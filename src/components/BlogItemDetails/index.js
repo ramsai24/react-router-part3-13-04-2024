@@ -1,19 +1,42 @@
 import {Component} from 'react'
+import Loader from 'react-loader-spinner'
+import 'react-loader-spinner/dist/loader/css/react-spinner-loader.css'
 
 import './index.css'
 
-const blogData = {
-  title: 'Blog Name',
-  imageUrl: 'https://assets.ccbp.in/frontend/react-js/placeholder-3-img.png',
-  avatarUrl: 'https://assets.ccbp.in/frontend/react-js/avatar-img.png',
-  author: 'Author Name',
-  content:
-    'Lorem Ipsum is simply dummy text of the printing and typesetting industry.',
-}
-
 class BlogItemDetails extends Component {
+  state = {blogItemData: {}, isLoading: true}
+
+  componentDidMount() {
+    this.getBlogItemDetails()
+  }
+
+  getBlogItemDetails = async () => {
+    const {match} = this.props
+    const {params} = match
+    const {id} = params
+    console.log(id)
+
+    const response = await fetch(`https://apis.ccbp.in/blogs/${id}`)
+    const data = await response.json()
+    console.log(data)
+
+    const updatedData = {
+      id: data.id,
+      title: data.title,
+      author: data.author,
+      avatarUrl: data.avatar_url,
+      imageUrl: data.image_url,
+      content: data.content,
+      topic: data.topic,
+    }
+
+    this.setState({blogItemData: updatedData, isLoading: false})
+  }
+
   renderBlogItemDetails = () => {
-    const {title, imageUrl, content, avatarUrl, author} = blogData
+    const {blogItemData} = this.state
+    const {title, imageUrl, content, avatarUrl, author} = blogItemData
     return (
       <div className="blog-info">
         <h2 className="blog-details-title">{title}</h2>
@@ -30,7 +53,13 @@ class BlogItemDetails extends Component {
   }
 
   render() {
-    return <div className="blog-container">{this.renderBlogItemDetails()}</div>
+    const {isLoading} = this.state
+
+    return (
+      <div className="blog-container">
+        {isLoading ? <Loader /> : this.renderBlogItemDetails()}
+      </div>
+    )
   }
 }
 
